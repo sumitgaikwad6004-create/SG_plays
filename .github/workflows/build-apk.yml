@@ -1,0 +1,48 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout source code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Find and Build Project
+      run: |
+        # Locate where build.gradle is in the repository
+        GRADLE_DIR=$(find . -name "build.gradle" -not -path "*/app/*" -exec dirname {} \;)
+        echo "Found project directory at: $GRADLE_DIR"
+        cd "$GRADLE_DIR"
+        
+        # Dynamically generate the gradle wrapper if missing
+        if [ ! -f gradlew ]; then
+          gradle wrapper
+        fi
+        
+        # Grant permissions and compile
+        chmod +x gradlew
+        ./gradlew assembleDebug
+        
+        # Create a temporary directory to move the APK out safely
+        mkdir -p $GITHUB_WORKSPACE/output_apk/
+        cp app/build/outputs/apk/debug/*.apk $GITHUB_WORKSPACE/output_apk/app-debug.apk
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug
+        path: output_apk/app-debug.apk
