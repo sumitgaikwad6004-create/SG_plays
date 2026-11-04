@@ -21,23 +21,19 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Find and Build Project
+    - name: Create Gradle Wrapper and Build
       run: |
-        # Locate where build.gradle is in the repository
-        GRADLE_DIR=$(find . -name "build.gradle" -not -path "*/app/*" -exec dirname {} \;)
-        echo "Found project directory at: $GRADLE_DIR"
-        cd "$GRADLE_DIR"
+        # Force entry into the capitalized directory
+        cd SG_PLAYS
         
-        # Dynamically generate the gradle wrapper if missing
-        if [ ! -f gradlew ]; then
-          gradle wrapper
-        fi
+        # Generate missing wrapper files
+        gradle wrapper
         
         # Grant permissions and compile
         chmod +x gradlew
         ./gradlew assembleDebug
         
-        # Create a temporary directory to move the APK out safely
+        # Create output directory
         mkdir -p $GITHUB_WORKSPACE/output_apk/
         cp app/build/outputs/apk/debug/*.apk $GITHUB_WORKSPACE/output_apk/app-debug.apk
 
