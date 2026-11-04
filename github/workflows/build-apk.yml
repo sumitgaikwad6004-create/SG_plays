@@ -1,0 +1,1 @@
+The full YAML configuration file for setting up the GitHub Actions workflow to build the Android APK—which handles checking out the repository, setting up JDK 17, granting Gradle execution rights, building the debug APK, and uploading the artifact—can be found in the referenced source documents.
